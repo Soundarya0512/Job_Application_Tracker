@@ -3,6 +3,7 @@ from database import supabase
 from pydantic import BaseModel
 app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
+from database import supabase, get_current_stage, get_all_application_ids
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,20 +39,19 @@ def db_insert(event: CreateEvent):
     }).execute()
     return response.data    
 
-def get_current_stage(application_id):
-    response = (
-        supabase.table("events")
-        .select("*")
-        .eq("application_id", application_id)
-        .eq("event_type", "stage_changed")
-        .order("created_at", desc=True)
-        .limit(1)
-        .execute()
-    )
-    if response.data:
-        return response.data[0]["payload"]["to_stage"]
-    return "discovered"
+
 
 @app.get("/applications/{application_id}/stage")
 def get_stage(application_id: str):
     return {"stage": get_current_stage(application_id)}
+
+
+@app.get("/board")
+def get_board():
+    result={}
+    for app_id in get_all_application_ids():
+        stage=get_current_stage(app_id)
+        if stage not in result:
+            result[stage]=[]
+        result[stage].append({"application_id":app_id})
+    return result
