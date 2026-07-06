@@ -23,7 +23,7 @@ def health():
 
 
 
-@app.get("/db_events")
+@app.get("/events")
 def get_events():
     response = supabase.table("events").select("*").execute()
     return response.data
