@@ -15,13 +15,32 @@ function App() {
       .then((data) => setBoard(data));
   }, []);
 
+  const [company,   setCompany]   = useState("")
+  const [title,     setTitle]     = useState("")
+  const [foundFrom, setFoundFrom] = useState("")
+
   return (
     <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "48px 24px" }}>
       <h1 style={{ fontSize: "42px", marginBottom: "4px" }}>Pipeline</h1>
       <p style={{ color: "var(--muted)", marginTop: 0 }}>
         {events.length} events in the log
       </p>
-
+      <input placeholder="Company" value={company} onChange={e => setCompany(e.target.value)} />
+      <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
+      <input placeholder="FoundFrom" value={foundFrom} onChange={e => setFoundFrom(e.target.value)} />
+      <button onClick={() => {
+              const paperwork = {
+                application_id: crypto.randomUUID(),
+                event_type: "application_created",
+                payload: { company_name: company, job_title: title, found_from: foundFrom },
+                source: "manual"
+              };
+              fetch("http://127.0.0.1:8000/events", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(paperwork)
+                  }).then(() => window.location.reload());
+            }}>Add</button>
       <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
         {Object.entries(board).map(([stage, apps]) => (
           <div key={stage} style={{ background: "var(--card)", border: "1px solid #E5E1D8", borderRadius: "8px", padding: "16px", minWidth: "200px" }}>
