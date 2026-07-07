@@ -31,3 +31,16 @@ def get_current_stage(application_id):
     if response.data:
         return response.data[0]["payload"]["to_stage"]
     return "discovered"
+
+
+def get_application_details(application_id):
+    response = (
+        supabase.table("events")
+        .select("*")
+        .eq("application_id", application_id)
+        .eq("event_type", "application_created")
+        .execute()
+    )
+    if response.data:
+        return response.data[0]["payload"]
+    return {"company_name": "Unknown", "job_title": "", "found_from": ""}

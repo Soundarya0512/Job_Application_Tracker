@@ -3,7 +3,7 @@ from database import supabase
 from pydantic import BaseModel
 app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
-from database import supabase, get_current_stage, get_all_application_ids
+from database import supabase, get_current_stage, get_all_application_ids,get_application_details
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,7 +51,9 @@ def get_board():
     result={}
     for app_id in get_all_application_ids():
         stage=get_current_stage(app_id)
+        details = get_application_details(app_id)
         if stage not in result:
             result[stage]=[]
-        result[stage].append({"application_id":app_id})
+        result[stage].append({"application_id": app_id, "details": details})
     return result
+
