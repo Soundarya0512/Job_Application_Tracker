@@ -39,7 +39,12 @@ function App() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(paperwork)
-                  }).then(() => window.location.reload());
+                  }).then(() => {
+                        setCompany("")
+                        setTitle("")
+                        setFoundFrom("")
+                        window.location.reload()
+                      });
             }}>Add</button>
       <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
         {Object.entries(board).map(([stage, apps]) => (
