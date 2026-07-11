@@ -2,20 +2,12 @@ import os
 from dotenv import load_dotenv
 from groq import Groq
 import json
+import requests 
+import uuid
 load_dotenv()
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-# Define your desired schema
-event_schema = {
-    "type": "object",
-    "properties": {
-        "company_name": {"type": "string"},
-        "job_title": {"type": "string"},
-        "found_from": {"type": "string"}
-    },
-    "required": ["company_name", "job_title", "found_from"],
-    "additionalProperties": False
-}
+
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 completion = client.chat.completions.create(
     model="llama-3.3-70b-versatile",
@@ -46,4 +38,11 @@ def helper_fun(value):
 if helper_fun(data["company_name"]) or helper_fun(data["job_title"]):
     print("Required details missing. Skipping this post.")
 else:
-    print("Valid — would post this.")
+    event = {
+        "application_id": str(uuid.uuid4()),     # a fresh unique id — Python's uuid, as a string
+        "event_type": "application_created",         # the EXACT string your board filters on
+        "payload": data,            # you already have this whole dict
+        "source": "ingestion_agent"             # the AI's signature
+    }
+    requests.post("http://127.0.0.1:8000/events", json=event)
+    print("Posted:", event)
