@@ -7,16 +7,24 @@ import uuid
 load_dotenv()
 
 
+
+clean_bullets=[{"text":"Developed a log analyzer Python automation script to parse and categorize captured error messages, generating individual output files for each error type, enabling faster identification and resolution of system issues.","source_id":["EXP-CGI-1"]},
+               {"text":"Utilized strong foundation in Computer Science, including programming languages, data structures, and software development, to successfully complete projects and contribute to team goals.","source_id":["EDU-1","SKILL-1","SKILL-6","SKILL-7","SKILL-8","SKILL-9"]},
+               {"text":"Created a full-stack application using FastAPI, Supabase, React, and Groq, applying software engineering principles to develop a scalable and efficient solution.","source_id":["PROJ-P-1","PROJ-P-2","PROJ-P-3"]},
+               {"text":"Demonstrated ability to work with modern languages and technologies, including Python, Groq, and SQL, with experience in developing and deploying software applications.","source_id":["SKILL-1","SKILL-2","SKILL-6","PROJ-RA-1","PROJ-OA-1"]}]
+
+numbered_bullets = []
+for i, bullet in enumerate(clean_bullets):
+    numbered_bullets.append(f"Bullet {i}: {bullet['text']}")
+
+bullets_text = "\n".join(numbered_bullets)
+
+
+
+
+
 with open("profile.md","r") as f:
     content=f.read()
-
-lines=content.split("\n")
-valid_ids  = set()
-for line in lines:
-    if line.startswith("["):
-        valid_ids.add(line[1:line.find("]")])
-
-#print(id)
 
 #print(content)
 
@@ -49,52 +57,6 @@ completion = client.chat.completions.create(
     model="llama-3.3-70b-versatile",
     messages=[
         {"role": "user", 
-        "content":f"""Here is a candidate's profile with ID-tagged facts: {content}.
-Here is a job posting: {job_description}.
-Write 4 tailored resume bullets for this posting. Every bullet must be
-based only on facts in the profile — do not invent anything. For each
-bullet, include the profile ID(s) it is based on as a list, even if
-there is only one. Respond with ONLY a JSON object with exactly this
-shape:{{"bullets": [{{"text": "...", "source_id": ["..."]}}]}}. No other text."""
-        }
-    ],
-  
-    response_format={"type": "json_object"}
-)
-reply = completion.choices[0].message.content
-data = json.loads(reply)
-#data["bullets"][0]["source_id"].append("FAKE-ID-999")
-print(data)
-
-clean_bullets = []
-for item in data["bullets"]:
-    flag = True                          # reset fresh, every single bullet
-    for cited_id in item["source_id"]:
-        if cited_id not in valid_ids:
-            flag = False
-    if flag:                             # OUTSIDE the inner loop, still inside the outer one
-        clean_bullets.append(item)        # keep the WHOLE bullet-dict, not just an id
-print("---------------------")
-print(f"Clean_bullets: {clean_bullets}")
-
-
-numbered_bullets = []
-for i, bullet in enumerate(clean_bullets):
-    numbered_bullets.append(f"Bullet {i}: {bullet['text']}")
-
-bullets_text = "\n".join(numbered_bullets)
-
-
-
-
-#print(content)
-
-
-
-completion = client.chat.completions.create(
-    model="llama-3.3-70b-versatile",
-    messages=[
-        {"role": "user", 
         "content": f"""Here are tailored resume bullets for a job posting.
 Job posting: {job_description}.
 Bullets: {bullets_text}.
@@ -108,27 +70,12 @@ ONLY a JSON object with exactly this shape: {{"scores": [{{"index": 0,
     response_format={"type": "json_object"}
 )
 reply = completion.choices[0].message.content
-data1 = json.loads(reply)
-print(data1)
+data = json.loads(reply)
+print(data)
 
 final_bullets = []
-for item in data1['scores']:
+for item in data['scores']:
     if item['score'] >= 70:
         final_bullets.append(clean_bullets[item['index']])
 
 print("Final_bullets: ", final_bullets)
-
-if final_bullets:
-    event = {
-        "application_id": "d88a201d-0bd6-44c6-8e68-9f48a12db3dd",
-        "event_type": "resume_bullets",
-        "payload": {"bullets": final_bullets},
-        "source": "tailor_agent"
-    }
-    requests.post("http://127.0.0.1:8000/events", json=event)
-    print("Posted:", event)
-else:
-    print("No bullets survived verification — nothing to post.")
-
-
-
