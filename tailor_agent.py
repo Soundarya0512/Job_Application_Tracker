@@ -76,3 +76,15 @@ for item in data["bullets"]:
         clean_bullets.append(item)        # keep the WHOLE bullet-dict, not just an id
 print("---------------------")
 print(f"Clean_bullets: {clean_bullets}")
+
+if clean_bullets:
+    event = {
+        "application_id": "d88a201d-0bd6-44c6-8e68-9f48a12db3dd",
+        "event_type": "resume_bullets",
+        "payload": {"bullets": clean_bullets},
+        "source": "tailor_agent"
+    }
+    requests.post("http://127.0.0.1:8000/events", json=event)
+    print("Posted:", event)
+else:
+    print("No bullets survived verification — nothing to post.")
