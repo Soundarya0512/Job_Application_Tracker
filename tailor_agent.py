@@ -119,16 +119,22 @@ for item in data1['scores']:
 print("Final_bullets: ", final_bullets)
 
 if final_bullets:
-    event = {
-        "application_id": "d88a201d-0bd6-44c6-8e68-9f48a12db3dd",
-        "event_type": "resume_bullets",
-        "payload": {"bullets": final_bullets},
-        "source": "tailor_agent"
-    }
-    requests.post("http://127.0.0.1:8000/events", json=event)
-    print("Posted:", event)
+    for items in final_bullets:
+        print(items["text"])
+
+    answer = input("Post these bullets? (y/n): ")
+    if answer.lower() == "y":
+        event = {
+            "application_id": "d88a201d-0bd6-44c6-8e68-9f48a12db3dd",
+            "event_type": "resume_bullets",
+            "payload": {"bullets": final_bullets},
+            "source": "tailor_agent"
+        }
+        requests.post("http://127.0.0.1:8000/events", json=event)
+        print("Posted:", event)
+    else:
+        print("Not approved — nothing posted.")
 else:
     print("No bullets survived verification — nothing to post.")
-
 
 
