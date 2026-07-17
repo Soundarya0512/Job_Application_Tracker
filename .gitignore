@@ -219,3 +219,7 @@ __marimo__/
 
 profile.md
 .env
+
+credentials.json
+
+token.json
