@@ -57,3 +57,10 @@ def get_board():
         result[stage].append({"application_id": app_id, "details": details})
     return result
 
+@app.get("/metrics")
+def get_metrics():
+    result = get_board()
+    funnel_counts = {}
+    for stage, apps in result.items():
+        funnel_counts[stage] = len(apps)
+    return {"funnel": funnel_counts}
