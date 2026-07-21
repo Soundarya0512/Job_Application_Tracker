@@ -18,6 +18,20 @@ function App() {
   const [company,   setCompany]   = useState("")
   const [title,     setTitle]     = useState("")
   const [foundFrom, setFoundFrom] = useState("")
+  const [activeTab, setActiveTab] = useState("board")
+  const [funnel, setFunnel] = useState({})
+  const [timeInStage, setTimeInStage] = useState([])
+
+    useEffect(() => {
+    if (activeTab === "metrics") {
+      fetch("http://127.0.0.1:8000/metrics")
+        .then((res) => res.json())
+        .then((data) => {
+          setFunnel(data.funnel)
+          setTimeInStage(data.time_in_stage)
+        });
+    }
+  }, [activeTab]);
 
   return (
     <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "48px 24px" }}>
@@ -25,6 +39,10 @@ function App() {
       <p style={{ color: "var(--muted)", marginTop: 0 }}>
         {events.length} events in the log
       </p>
+      <button onClick={() => setActiveTab("board")}>Board</button>
+      <button onClick={() => setActiveTab("metrics")}>Metrics</button>
+      {activeTab === "board" ? (
+      <div>
       <input placeholder="Company" value={company} onChange={e => setCompany(e.target.value)} />
       <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
       <input placeholder="FoundFrom" value={foundFrom} onChange={e => setFoundFrom(e.target.value)} />
@@ -70,7 +88,16 @@ function App() {
         ))}
       </div>
     </div>
+    ) : (
+  <div>
+  {Object.entries(funnel).map(([stage, count]) => (
+    <div key={stage}>
+      {stage}: {count}
+    </div>
+  ))}
+</div>
+)}
+    </div>
   );
 }
-
 export default App;
