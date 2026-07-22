@@ -3,7 +3,7 @@ from database import supabase
 from pydantic import BaseModel
 app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
-from database import supabase, get_current_stage, get_all_application_ids,get_application_details
+from database import supabase, get_current_stage, get_all_application_ids, get_application_details, get_time_in_stage
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,4 +63,6 @@ def get_metrics():
     funnel_counts = {}
     for stage, apps in result.items():
         funnel_counts[stage] = len(apps)
-    return {"funnel": funnel_counts}
+    time_in_stage = get_time_in_stage("d88a201d-0bd6-44c6-8e68-9f48a12db3dd")
+    
+    return {"funnel": funnel_counts, "time_in_stage": time_in_stage}
